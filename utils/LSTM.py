@@ -5,6 +5,12 @@ LSTM
 
 import tensorflow as tf
 
+def sigmoid(x):
+    return 1 / (1 + tf.exp(-x))
+
+def tanh(x):
+    return (tf.exp(x) - tf.exp(-x)) / (tf.exp(x) + tf.exp(-x))
+
 
 class LSTMCell(tf.keras.Model):
     '''
@@ -59,13 +65,16 @@ class LSTMCell(tf.keras.Model):
 
         :param input_shape: shape of "inputs" of "call" method [batch_size, time_steps, dim]
         '''
-
+     
         kernel_shape, recurrent_shape, bias_shape = None, None, None
-
+        
         ###################################################
         # TODO: Specify the parameter shapes              #
         ###################################################
-        #raise NotImplementedError
+        input_dim = input_shape[-1]
+        kernel_shape = (input_dim, self.units * 4)
+        recurrent_shape = (self.units, self.units * 4)
+        bias_shape = (self.units * 4,)
         
         ###################################################
         # END TODO                                        #
@@ -114,7 +123,22 @@ class LSTMCell(tf.keras.Model):
         ###################################################
         # TODO: LSTMCell forward pass                     #
         ###################################################
-        #raise NotImplementedError
+        h_t1 = states[0]
+        c_t1 = states[1] 
+
+
+        z = tf.matmul(inputs, self.kernel)
+        z += tf.matmul(h_t1, self.recurrent_kernel)
+        z += self.bias
+
+        z0, z1, z2, z3 = tf.split(z, 4, axis=1)
+
+        forget_gate = sigmoid(z0)
+        input_gate = sigmoid(z1)
+        cell_hat = tanh(z2)
+        output_gate = sigmoid(z3)
+        c = forget_gate * c_t1 + input_gate * cell_hat
+        h = tanh(c) * output_gate
         
         ###################################################
         # END TODO                                        #
@@ -142,8 +166,14 @@ class LSTMModel(tf.keras.Model):
         ###################################################
         # TODO: Add the RNN and other layers              #
         ###################################################
-        #raise NotImplementedError
-
+        self.lstm_cell = LSTMCell(
+            units, 
+            kernel_initializer=tf.keras.initializers.Ones, 
+            recurrent_initializer=tf.keras.initializers.Ones, 
+            bias_initializer=tf.keras.initializers.Zeros
+        )
+        self.rnn = tf.keras.layers.RNN(self.lstm_cell)
+        self.dense = tf.keras.layers.Dense(8, activation='sigmoid')
         ###################################################
         # END TODO                                        #
         ###################################################
@@ -162,8 +192,8 @@ class LSTMModel(tf.keras.Model):
         ###################################################
         # TODO: Feedforward through your model            #
         ###################################################
-        #raise NotImplementedError
-
+        x = self.rnn(x)
+        x = self.dense(x)
         ###################################################
         # END TODO                                        #
         ###################################################
