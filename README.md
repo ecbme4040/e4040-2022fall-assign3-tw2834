@@ -30,6 +30,38 @@ TODO students: Run commands to create a directory tree, as described in previous
 ```   
 ./
 ├── Assignment3-intro.ipynb
+├── README.md
+├── figures
+│   ├── tw2834_gcp_work_example_screenshot_1.png
+│   ├── tw2834_gcp_work_example_screenshot_2.png
+│   └── tw2834_gcp_work_example_screenshot_3.png
+├── img
+│   ├── bptt.png
+│   ├── bptt2.jpg
+│   ├── charrnn.jpg
+│   ├── doubleLSTM.png
+│   ├── embedding.png
+│   ├── lstm_cell.png
+│   ├── seq2seq.jpg
+│   ├── singleLSTM.png
+│   ├── tsne_female_male.png
+│   ├── xnor.png
+│   └── xor.png
+├── task1-xor.ipynb
+├── task2-rnn-applications.ipynb
+├── tweets_data
+│   ├── testTweets_preprocessed.json
+│   ├── trainTweets_preprocessed.json
+│   └── vocabulary.pkl
+└── utils
+    ├── LSTM.py
+    ├── __pycache__
+    │   └── rnn_utils.cpython-36.pyc
+    ├── dataset.py
+    └── rnn_utils.py
+
+5 directories, 25 files
 ...
 
-```
+```./
+
