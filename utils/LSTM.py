@@ -65,7 +65,6 @@ class LSTMCell(tf.keras.Model):
 
         :param input_shape: shape of "inputs" of "call" method [batch_size, time_steps, dim]
         '''
-#         print(input_shape)
         kernel_shape, recurrent_shape, bias_shape = None, None, None
         
         ###################################################
@@ -125,11 +124,8 @@ class LSTMCell(tf.keras.Model):
         ###################################################
         h_t1 = states[0]
         c_t1 = states[1] 
-
-        sigmoid = lambda x: tf.math.sigmoid(x)
-        tanh = lambda x: tf.math.tanh(x)
     
-        n_units = h_t1.shape[-1]
+        n_units = self.units
         n_sequence = len(inputs)
         # forget gate
         ft = sigmoid(tf.matmul(h_t1, self.recurrent_kernel[:, :n_units]) + tf.matmul(inputs, self.kernel[:, :n_units])  + self.bias[:n_units]) 
@@ -140,11 +136,10 @@ class LSTMCell(tf.keras.Model):
         # output gate
         ot = sigmoid(tf.matmul(h_t1, self.recurrent_kernel[:, n_units*2:n_units*3]) + tf.matmul(inputs, self.kernel[:, n_units*2:n_units*3]) + self.bias[n_units*2:n_units*3])
    
-        ct_in = tanh(tf.matmul(h_t1, self.recurrent_kernel[:, n_units*3:]) + tf.matmul(inputs, self.kernel[:, n_units*3:]) + self.bias[n_units*3:])#1, 256
-        c = tf.add(tf.multiply(ft,c_t1 ), tf.multiply(it, ct_in))
+        ct_in = tanh(tf.matmul(h_t1, self.recurrent_kernel[:, n_units*3:]) + tf.matmul(inputs, self.kernel[:, n_units*3:]) + self.bias[n_units*3:])
 
-        h = tf.multiply(ot, tanh(c))
-
+        c = ft * c_t1 + it * ct_in
+        h = ot * tanh(c)
         
         ###################################################
         # END TODO                                        #
@@ -175,12 +170,14 @@ class LSTMModel(tf.keras.Model):
         self.units = units
         self.lstm_cell = LSTMCell(
             units, 
-            kernel_initializer=tf.keras.initializers.Ones, 
-            recurrent_initializer=tf.keras.initializers.Ones, 
-            bias_initializer=tf.keras.initializers.Zeros
+            kernel_initializer=tf.keras.initializers.GlorotNormal, 
+            recurrent_initializer=tf.keras.initializers.GlorotNormal, 
+            bias_initializer=tf.keras.initializers.GlorotNormal
         )
         self.rnn = tf.keras.layers.RNN(self.lstm_cell, input_shape=input_shape)
-        self.dense1 = tf.keras.layers.Dense(8, activation='sigmoid')
+        self.dense1 = tf.keras.layers.Dense(units, activation= activation)
+        self.dense2 = tf.keras.layers.Dense(units, activation= activation)
+        self.dense3 = tf.keras.layers.Dense(output_dim, activation='sigmoid')
         ###################################################
         # END TODO                                        #
         ###################################################
@@ -201,6 +198,8 @@ class LSTMModel(tf.keras.Model):
         ###################################################
         x = self.rnn(x)
         x = self.dense1(x)
+        x = self.dense2(x)
+        x = self.dense3(x)
         ###################################################
         # END TODO                                        #
         ###################################################
