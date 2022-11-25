@@ -132,36 +132,18 @@ class LSTMCell(tf.keras.Model):
         n_units = h_t1.shape[-1]
         n_sequence = len(inputs)
         # forget gate
-        ft = sigmoid(tf.matmul(h_t1, self.recurrent_kernel[:, :n_units]) + tf.matmul(inputs, self.kernel[:, :n_units])  + self.bias[:n_units]) #1, 256
+        ft = sigmoid(tf.matmul(h_t1, self.recurrent_kernel[:, :n_units]) + tf.matmul(inputs, self.kernel[:, :n_units])  + self.bias[:n_units]) 
     
-
         # input gate
-        it = sigmoid(tf.matmul(h_t1, self.recurrent_kernel[:, n_units:n_units*2]) + tf.matmul(inputs, self.kernel[:, n_units:n_units*2]) + self.bias[n_units:n_units*2])#1, 256
-  
+        it = sigmoid(tf.matmul(h_t1, self.recurrent_kernel[:, n_units:n_units*2]) + tf.matmul(inputs, self.kernel[:, n_units:n_units*2]) + self.bias[n_units:n_units*2])
 
-        # output
-        ot = sigmoid(tf.matmul(h_t1, self.recurrent_kernel[:, n_units*2:n_units*3]) + tf.matmul(inputs, self.kernel[:, n_units*2:n_units*3]) + self.bias[n_units*2:n_units*3])#1, 256
+        # output gate
+        ot = sigmoid(tf.matmul(h_t1, self.recurrent_kernel[:, n_units*2:n_units*3]) + tf.matmul(inputs, self.kernel[:, n_units*2:n_units*3]) + self.bias[n_units*2:n_units*3])
    
-
-        # ct_in = tf.concat([h_tl, cell_inputs], axis=1)
-        ct_ = tanh(tf.matmul(h_t1, self.recurrent_kernel[:, n_units*3:]) + tf.matmul(inputs, self.kernel[:, n_units*3:]) + self.bias[n_units*3:])#1, 256
-        c = tf.add(tf.multiply(ft,c_t1 ), tf.multiply(it, ct_))
+        ct_in = tanh(tf.matmul(h_t1, self.recurrent_kernel[:, n_units*3:]) + tf.matmul(inputs, self.kernel[:, n_units*3:]) + self.bias[n_units*3:])#1, 256
+        c = tf.add(tf.multiply(ft,c_t1 ), tf.multiply(it, ct_in))
 
         h = tf.multiply(ot, tanh(c))
-
-
-#         z = tf.matmul(inputs, self.kernel)
-#         z += tf.matmul(h_t1, self.recurrent_kernel)
-#         z += self.bias
-
-#         z0, z1, z2, z3 = tf.split(z, 4, axis=1)
-
-#         forget_gate = sigmoid(z0)
-#         input_gate = sigmoid(z1)
-#         cell_hat = tanh(z2)
-#         output_gate = sigmoid(z3)
-#         c = forget_gate * c_t1 + input_gate * cell_hat
-#         h = tanh(c) * output_gate
 
         
         ###################################################
@@ -198,8 +180,7 @@ class LSTMModel(tf.keras.Model):
             bias_initializer=tf.keras.initializers.Zeros
         )
         self.rnn = tf.keras.layers.RNN(self.lstm_cell, input_shape=input_shape)
-#         self.dense1 = tf.keras.layers.ReLU(32)
-        self.dense2 = tf.keras.layers.Dense(8, activation='sigmoid')
+        self.dense1 = tf.keras.layers.Dense(8, activation='sigmoid')
         ###################################################
         # END TODO                                        #
         ###################################################
@@ -219,8 +200,7 @@ class LSTMModel(tf.keras.Model):
         # TODO: Feedforward through your model            #
         ###################################################
         x = self.rnn(x)
-#         x = self.dense1(x)
-        x = self.dense2(x)
+        x = self.dense1(x)
         ###################################################
         # END TODO                                        #
         ###################################################
